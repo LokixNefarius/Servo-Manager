@@ -22,7 +22,7 @@ BoxLayout:
             size: self.size
 
     MDTopAppBar:
-        title: "Servos Manager"
+        title: "Servo Manager"
         right_action_items: [["information", lambda x: app.show_about()]]
 
     GridLayout:
