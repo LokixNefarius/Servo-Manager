@@ -203,7 +203,7 @@ class ServoApp(MDApp):
         about_dialog = MDDialog(
             title="Sobre",
             text='''Nome do App: Servo Manager
-Versão: 1.0.1
+Versão: 1.1.1
 Desenvolvedor: Loki Nefarius
 Descrição: Controle e fortaleça seus servos astrais.''',
             buttons=[MDRaisedButton(text="OK", on_release=lambda x: about_dialog.dismiss())]
