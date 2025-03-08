@@ -27,14 +27,14 @@ BoxLayout:
 
     GridLayout:
         cols: 1
-        padding: [5, 5]
-        spacing: 5
+        padding: [2, 2]
+        spacing: 2
 
         Image:
             id: servo_image
             source: ""
             size_hint: None, None
-            size: 1050, 800
+            size: 1050, 700
             pos_hint: {'center_x': 0.5}
             
         MDLabel:
@@ -74,9 +74,9 @@ BoxLayout:
 
     BoxLayout:  # Buttons container
         orientation: 'vertical'  # Arrange buttons vertically
-        size_hint_y: 0.3
+        size_hint_y: 0.5
         pos_hint: {'center_x': 0.5}
-        spacing: 20 
+        spacing: 15 
         
         MDLabel:
             id: servo_text_space2
@@ -126,14 +126,14 @@ class ServoApp(MDApp):
     servos_dir = "servos"
     servos_data_dir = "servos_data"
     current_servo = None
-    audio = None
+    code_input = None # Adicionando a referência ao MDTextField
 
     def build(self):
+        self.binaural = SoundLoader.load("binaural.mp3")  # Carrega o som binaural
         return Builder.load_string(KV)
 
     def on_start(self):
         self.load_servos()
-        self.load_audio()
 
     def load_servos(self):
         servos_list = self.root.ids.servos_list
@@ -157,6 +157,9 @@ class ServoApp(MDApp):
         self.root.ids.servo_name.text = filename
         self.current_servo = filename
         self.load_servo_data(filename)
+        if self.binaural:
+            self.binaural.loop = True
+            self.binaural.play()
 
     def load_servo_data(self, filename):
         servo_data_path = os.path.join(self.servos_data_dir, f"{filename}.json")
@@ -248,10 +251,11 @@ class ServoApp(MDApp):
             self.dialog.open()
             return
 
+        self.code_input = MDTextField(hint_text="Digite o código do servo") # Criando e mantendo a referência
         self.dialog = MDDialog(
             title="Definir Código do Servo",
             type="custom",
-            content_cls=MDTextField(hint_text="Digite o código do servo"),
+            content_cls=self.code_input,
             buttons=[
                 MDRaisedButton(text="Salvar", on_release=lambda x: self.save_servo_code()),
                 MDRaisedButton(text="Cancelar", on_release=lambda x: self.dialog.dismiss())
@@ -263,7 +267,7 @@ class ServoApp(MDApp):
         if self.current_servo is None:
             return
 
-        new_code = self.dialog.content_cls.text
+        new_code = self.code_input.text # Usando a referência direta
         if not new_code.isdigit():
             return
 
@@ -279,31 +283,33 @@ class ServoApp(MDApp):
             json.dump(servo_data, file)
 
         self.dialog.dismiss()
+        self.code_input = None # Limpando a referência após fechar o diálogo.
         
     def show_about(self):
-        if not self.dialog:
-            self.dialog = MDDialog(
-                title="Sobre",
-                text='''Nome do App: Servo Manager
-\nVersão: 2.0
+        def close_about_dialog(instance):
+            about_dialog.dismiss()
+        about_dialog = MDDialog(
+            title="Sobre",
+            text='''Nome do App: Servo Manager
+\nVersão: 1.0.1
 \nDesenvolvedor: Loki Nefarius, inspirado pelo
 \nTecnomago (Caotize-se)
 \nDescrição: controle o poder dos servos astrais com \neste aplicativo tecnomágico! O Servo Manager \npermite que você gerencie e recompense seus servos de \nforma intuitiva e eficaz.
 \nComo funciona: Cada servo astral possui um código \nnumérico único. Ao completar tarefas com sucesso, \nvocê recompensa o servo com esse código, como uma \ncriptomoeda especial que o fortalece e o motiva. \nImagine que seus servos são movidos a essa "droga" \nde recompensa, sempre dispostos a realizar suas \nordens em troca de mais poder e prazer.
 \nQuer saber mais sobre a filosofia por trás do aplicativo? Visite: https://caotize.se/
 ''',
-                buttons=[MDRaisedButton(text="OK", on_release=lambda x: self.dialog.dismiss())]
+                buttons=[MDRaisedButton(text="OK", on_release=lambda x: about_dialog.dismiss())]
             )
-        self.dialog.open()
+        about_dialog.open()
         
-    def load_audio(self):
-        self.audio = SoundLoader.load("alpha.wav") 
+    #def load_audio(self):
+        #self.audio = SoundLoader.load("alpha.wav") 
         
-    def play_audio(self):
+    '''def play_audio(self):
         if self.audio:
             self.audio.play()
         else:
-            print("Áudio não encontrado.")
+            print("Áudio não encontrado.")'''
 
 if __name__ == '__main__':
     ServoApp().run()
